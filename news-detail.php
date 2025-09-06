@@ -51,7 +51,7 @@ if (!$post = mysqli_fetch_assoc($result)) {
 
     <!-- Open Graph Meta Tags for Social Media Sharing -->
     <?php
-    // Determine the best image for Facebook sharing
+    // Enhanced Facebook sharing image logic
     $og_image_url = '';
     $og_image_width = 1200;
     $og_image_height = 630;
@@ -59,46 +59,44 @@ if (!$post = mysqli_fetch_assoc($result)) {
     
     // Check if post has a featured image
     if (!empty($post['image_url'])) {
-        // Construct absolute URL for the featured image
         $image_path = $post['image_url'];
         
-        // Ensure we have an absolute URL
+        // Ensure absolute URL for Facebook
         if (strpos($image_path, 'http') !== 0) {
-            // Remove leading slash if present to avoid double slashes
             $image_path = ltrim($image_path, '/');
             $og_image_url = "https://" . $_SERVER['HTTP_HOST'] . "/" . $image_path;
         } else {
             $og_image_url = $image_path;
         }
         
-        // Check if image file exists (for local images)
-        if (strpos($image_path, $_SERVER['HTTP_HOST']) !== false || strpos($image_path, 'http') !== 0) {
-            $local_path = strpos($image_path, 'http') === 0 ? 
-                str_replace("https://" . $_SERVER['HTTP_HOST'] . "/", "", $image_path) : 
-                ltrim($image_path, '/');
-                
-            if (file_exists($local_path)) {
-                // Get actual image dimensions if possible
-                $image_info = getimagesize($local_path);
-                if ($image_info !== false) {
-                    $og_image_width = $image_info[0];
-                    $og_image_height = $image_info[1];
-                }
-            }
-        }
-    } else {
-        // Fallback to SEAIT logo with proper dimensions
-        $og_image_url = "https://" . $_SERVER['HTTP_HOST'] . "/assets/images/seait-logo.png";
-        $og_image_alt = "SEAIT - South East Asian Institute of Technology, Inc.";
-        
-        // Check if logo exists and get its dimensions
-        if (file_exists('assets/images/seait-logo.png')) {
-            $image_info = getimagesize('assets/images/seait-logo.png');
+        // Try to get actual image dimensions for better quality
+        $local_path = str_replace("https://" . $_SERVER['HTTP_HOST'] . "/", "", $og_image_url);
+        if (file_exists($local_path)) {
+            $image_info = @getimagesize($local_path);
             if ($image_info !== false) {
                 $og_image_width = $image_info[0];
                 $og_image_height = $image_info[1];
             }
         }
+    } else {
+        // High-quality fallback to SEAIT logo
+        $og_image_url = "https://" . $_SERVER['HTTP_HOST'] . "/assets/images/seait-logo.png";
+        $og_image_alt = "SEAIT - South East Asian Institute of Technology, Inc.";
+        
+        // Get logo dimensions if available
+        if (file_exists('assets/images/seait-logo.png')) {
+            $image_info = @getimagesize('assets/images/seait-logo.png');
+            if ($image_info !== false) {
+                $og_image_width = $image_info[0];
+                $og_image_height = $image_info[1];
+            }
+        }
+    }
+    
+    // Ensure minimum Facebook recommended dimensions
+    if ($og_image_width < 1200 || $og_image_height < 630) {
+        $og_image_width = max($og_image_width, 1200);
+        $og_image_height = max($og_image_height, 630);
     }
     ?>
     <meta property="og:title" content="<?php echo htmlspecialchars($post['title']); ?>">
@@ -110,10 +108,13 @@ if (!$post = mysqli_fetch_assoc($result)) {
     <meta property="og:image:secure_url" content="<?php echo htmlspecialchars($og_image_url); ?>">
     <meta property="og:image:width" content="<?php echo $og_image_width; ?>">
     <meta property="og:image:height" content="<?php echo $og_image_height; ?>">
-    <meta property="og:image:alt" content="<?php echo $og_image_alt; ?>">
-    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="<?php echo htmlspecialchars($og_image_alt); ?>">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:locale" content="en_US">
     <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID_HERE">
+    
+    <!-- Cache busting for Facebook to refresh preview -->
+    <meta property="og:updated_time" content="<?php echo time(); ?>">
 
     <!-- Facebook App ID (optional but recommended) -->
     <!-- <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID"> -->
@@ -123,32 +124,12 @@ if (!$post = mysqli_fetch_assoc($result)) {
     <meta name="twitter:title" content="<?php echo htmlspecialchars($post['title']); ?>">
     <meta name="twitter:description" content="<?php echo htmlspecialchars(substr(strip_tags($post['content']), 0, 200)) . '...'; ?>">
     <meta name="twitter:image" content="<?php echo htmlspecialchars($og_image_url); ?>">
-    <meta name="twitter:image:alt" content="<?php echo $og_image_alt; ?>">
+    <meta name="twitter:image:alt" content="<?php echo htmlspecialchars($og_image_alt); ?>">
 
     <!-- Article Meta Tags -->
     <meta property="article:published_time" content="<?php echo $post['created_at']; ?>">
-    <meta property="article:modified_time" content="<?php echo $post['updated_at'] ?? $post['created_at']; ?>">
     <meta property="article:author" content="<?php echo htmlspecialchars($post['author'] ?? $post['first_name'] . ' ' . $post['last_name']); ?>">
     <meta property="article:section" content="<?php echo ucfirst($post['type']); ?>">
-    <meta property="article:tag" content="SEAIT, <?php echo ucfirst($post['type']); ?>, Education">
-    
-    <!-- Additional Meta Tags for Better Social Sharing -->
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="<?php echo htmlspecialchars($post['author'] ?? $post['first_name'] . ' ' . $post['last_name']); ?>">
-    <meta name="publisher" content="SEAIT - South East Asian Institute of Technology, Inc.">
-    
-    <!-- Cache Busting for Facebook Debugger -->
-    <meta property="og:updated_time" content="<?php echo time(); ?>">
-    
-    <!-- Debug Information (only visible in source) -->
-    <!-- 
-    DEBUG INFO:
-    Post ID: <?php echo $post_id; ?>
-    Image URL: <?php echo htmlspecialchars($post['image_url'] ?? 'No image'); ?>
-    OG Image URL: <?php echo htmlspecialchars($og_image_url); ?>
-    OG Image Dimensions: <?php echo $og_image_width; ?>x<?php echo $og_image_height; ?>
-    Facebook Debugger: https://developers.facebook.com/tools/debug/?q=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>
-    -->
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -605,7 +586,7 @@ if (!$post = mysqli_fetch_assoc($result)) {
                         <a href="javascript:void(0);"
                            onclick="debugFacebookShare('<?php echo 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>')"
                            class="text-gray-600 hover:text-seait-orange transition p-2 rounded-full hover:bg-gray-100"
-                           title="Debug Facebook Share">
+                           title="Debug Facebook Share Preview">
                             <i class="fas fa-bug text-lg"></i>
                         </a>
                         <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>&text=<?php echo urlencode(htmlspecialchars($post['title'])); ?>"
@@ -692,29 +673,24 @@ if (!$post = mysqli_fetch_assoc($result)) {
         // Update active link on page load
         document.addEventListener('DOMContentLoaded', updateActiveNavLink);
 
-        // Facebook sharing function with enhanced preview handling
+        // Enhanced Facebook sharing function for clear preview images
         function shareToFacebook(title, url) {
             try {
                 // Encode the URL properly
                 const encodedUrl = encodeURIComponent(url);
 
-                // Add cache-busting parameter to force Facebook to re-scrape
-                const timestamp = Date.now();
-                const urlWithCacheBust = url + (url.includes('?') ? '&' : '?') + 'fb_refresh=' + timestamp;
-                const encodedUrlWithCacheBust = encodeURIComponent(urlWithCacheBust);
-
-                // Create Facebook share URL - using the original URL for sharing but cache-busted for debugging
+                // Create Facebook share URL
                 const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
 
-                // Log sharing attempt for debugging
-                console.log('Sharing to Facebook:', {
+                // Log sharing info for debugging
+                console.log('Facebook Share Info:', {
                     title: title,
                     url: url,
-                    facebookUrl: facebookUrl,
-                    debugUrl: `https://developers.facebook.com/tools/debug/?q=${encodedUrl}`
+                    ogImage: '<?php echo htmlspecialchars($og_image_url); ?>',
+                    dimensions: '<?php echo $og_image_width; ?>x<?php echo $og_image_height; ?>'
                 });
 
-                // Open Facebook share dialog with improved dimensions
+                // Open Facebook share dialog with optimal dimensions
                 const width = 626;
                 const height = 436;
                 const left = (screen.width - width) / 2;
@@ -728,16 +704,13 @@ if (!$post = mysqli_fetch_assoc($result)) {
 
                 // Check if popup was blocked
                 if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-                    console.warn('Facebook popup was blocked');
-                    // Popup was blocked, show alternative options
+                    console.warn('Facebook popup blocked, showing alternatives');
                     showShareOptions(title, url);
                 } else {
-                    // Focus the popup window
                     popup.focus();
                 }
             } catch (error) {
                 console.error('Facebook sharing error:', error);
-                // Show alternative sharing options
                 showShareOptions(title, url);
             }
         }
@@ -796,55 +769,75 @@ if (!$post = mysqli_fetch_assoc($result)) {
             }
         }
 
-        // Function to debug Facebook sharing
+        // Debug function for Facebook sharing preview
         function debugFacebookShare(url) {
             const debugUrl = `https://developers.facebook.com/tools/debug/?q=${encodeURIComponent(url)}`;
             
             console.log('Facebook Debug Info:', {
                 pageUrl: url,
                 debugUrl: debugUrl,
-                ogImageUrl: '<?php echo htmlspecialchars($og_image_url); ?>',
+                ogImage: '<?php echo htmlspecialchars($og_image_url); ?>',
                 ogTitle: '<?php echo htmlspecialchars($post['title']); ?>',
-                ogDescription: '<?php echo htmlspecialchars(substr(strip_tags($post['content']), 0, 200)) . '...'; ?>'
+                dimensions: '<?php echo $og_image_width; ?>x<?php echo $og_image_height; ?>'
             });
 
-            // Show debug modal with helpful information
+            // Show debug modal
             const debugModal = `
-                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <h3 class="text-lg font-bold mb-4 text-seait-dark">Facebook Share Debug</h3>
-                        <div class="space-y-4 text-sm">
-                            <div>
-                                <strong>Page URL:</strong><br>
-                                <code class="bg-gray-100 p-2 rounded block mt-1">${url}</code>
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="closeDebugModal()">
+                    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-seait-dark">Facebook Share Preview Debug</h3>
+                            <button onclick="closeDebugModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-blue-800 mb-2">Current Page Info</h4>
+                                <div class="text-sm space-y-2">
+                                    <div><strong>Title:</strong> <?php echo htmlspecialchars($post['title']); ?></div>
+                                    <div><strong>URL:</strong> <code class="bg-white px-2 py-1 rounded">${url}</code></div>
+                                    <div><strong>Image:</strong> <code class="bg-white px-2 py-1 rounded break-all"><?php echo htmlspecialchars($og_image_url); ?></code></div>
+                                    <div><strong>Dimensions:</strong> <?php echo $og_image_width; ?> x <?php echo $og_image_height; ?> pixels</div>
+                                </div>
                             </div>
-                            <div>
-                                <strong>OG Image:</strong><br>
-                                <code class="bg-gray-100 p-2 rounded block mt-1"><?php echo htmlspecialchars($og_image_url); ?></code>
+
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-green-800 mb-2">Preview Image</h4>
+                                <img src="<?php echo htmlspecialchars($og_image_url); ?>" 
+                                     alt="Facebook Preview" 
+                                     class="w-full max-w-md mx-auto rounded border shadow-sm"
+                                     onerror="this.parentElement.innerHTML='<div class=\\'text-red-600\\'>❌ Image failed to load</div>'">
                             </div>
-                            <div>
-                                <strong>Image Dimensions:</strong> <?php echo $og_image_width; ?>x<?php echo $og_image_height; ?>px
-                            </div>
-                            <div class="bg-blue-50 p-3 rounded">
-                                <strong>Facebook Debugger:</strong><br>
-                                <p class="text-xs text-gray-600 mt-1">Use this tool to see how Facebook sees your page and refresh the cache:</p>
-                                <a href="${debugUrl}" target="_blank" class="text-blue-600 hover:underline text-sm">${debugUrl}</a>
-                            </div>
-                            <div class="bg-yellow-50 p-3 rounded">
-                                <strong>Tips for better sharing:</strong>
-                                <ul class="text-xs text-gray-600 mt-1 list-disc list-inside">
-                                    <li>Images should be at least 1200x630px for best quality</li>
-                                    <li>Use high-quality, clear images</li>
-                                    <li>Avoid text-heavy images</li>
-                                    <li>Use the Facebook Debugger to refresh cache after changes</li>
+
+                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-yellow-800 mb-2">📋 Tips for Clear Facebook Previews</h4>
+                                <ul class="text-sm space-y-1 text-yellow-700">
+                                    <li>• Images should be at least 1200x630px for best quality</li>
+                                    <li>• Use high-resolution, clear images without too much text</li>
+                                    <li>• Facebook caches previews - use the debugger to refresh</li>
+                                    <li>• JPEG format often works better than PNG for photos</li>
                                 </ul>
                             </div>
+
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-red-800 mb-2">🔧 Facebook Debugger Tool</h4>
+                                <p class="text-sm text-red-700 mb-3">Use Facebook's official tool to see exactly how your page appears and refresh the cache:</p>
+                                <button onclick="window.open('${debugUrl}', '_blank')" 
+                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">
+                                    🔍 Open Facebook Debugger
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex space-x-3 mt-6">
-                            <button onclick="window.open('${debugUrl}', '_blank')" class="flex-1 bg-seait-orange hover:bg-orange-600 text-white py-2 px-4 rounded transition">
-                                Open Facebook Debugger
+
+                        <div class="mt-6 flex space-x-3">
+                            <button onclick="shareToFacebook('<?php echo htmlspecialchars($post['title']); ?>', '${url}')" 
+                                    class="flex-1 bg-seait-orange hover:bg-orange-600 text-white py-2 px-4 rounded transition">
+                                📱 Test Facebook Share
                             </button>
-                            <button onclick="closeDebugModal()" class="flex-1 text-seait-orange bg-white border border-seait-orange hover:bg-seait-orange hover:text-white transition py-2 px-4 rounded">
+                            <button onclick="closeDebugModal()" 
+                                    class="flex-1 border border-gray-300 hover:bg-gray-50 py-2 px-4 rounded transition">
                                 Close
                             </button>
                         </div>
@@ -855,7 +848,7 @@ if (!$post = mysqli_fetch_assoc($result)) {
             document.body.insertAdjacentHTML('beforeend', debugModal);
         }
 
-        // Function to close the debug modal
+        // Function to close debug modal
         function closeDebugModal() {
             const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50');
             if (modal) {
