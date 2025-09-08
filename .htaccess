@@ -1,3 +1,16 @@
+# CRITICAL: Allow Facebook and social media scrapers FIRST
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Allow Facebook's scraper to access ALL pages - highest priority
+    RewriteCond %{HTTP_USER_AGENT} facebookexternalhit [NC]
+    RewriteRule ^(.*)$ - [L,E=ALLOW_FB:1]
+    
+    # Allow other social media scrapers
+    RewriteCond %{HTTP_USER_AGENT} (Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|DiscordBot) [NC]
+    RewriteRule ^(.*)$ - [L,E=ALLOW_SOCIAL:1]
+</IfModule>
+
 <IfModule mod_php.c>
     php_value upload_max_filesize 128M
     php_value post_max_size 128M
@@ -22,41 +35,40 @@ ErrorDocument 404 /seait/404.php
 ErrorDocument 403 /seait/404.php
 ErrorDocument 500 /seait/404.php
 
-# Allow Facebook and social media scrapers
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    
-    # Allow Facebook's scraper to access all pages
-    RewriteCond %{HTTP_USER_AGENT} facebookexternalhit [NC]
-    RewriteRule ^(.*)$ - [L]
-    
-    # Allow other social media scrapers
-    RewriteCond %{HTTP_USER_AGENT} (Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|DiscordBot) [NC]
-    RewriteRule ^(.*)$ - [L]
-</IfModule>
 
 # Security headers
 <IfModule mod_headers.c>
-    Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options DENY
-    Header always set X-XSS-Protection "1; mode=block"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    
     # Allow Facebook scraper to access pages
     SetEnvIf User-Agent "facebookexternalhit" allow_fb_scraper
+    SetEnvIf User-Agent "(Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|DiscordBot)" allow_social_scraper
+    
+    # Apply security headers only to non-scraper requests
+    Header always set X-Content-Type-Options nosniff env=!allow_fb_scraper
+    Header always set X-Frame-Options DENY env=!allow_fb_scraper
+    Header always set X-XSS-Protection "1; mode=block" env=!allow_fb_scraper
+    Header always set Referrer-Policy "strict-origin-when-cross-origin" env=!allow_fb_scraper
+    
+    # Set robots tag for non-scrapers
     Header always set X-Robots-Tag "noindex, nofollow" env=!allow_fb_scraper
+    Header always set X-Robots-Tag "noindex, nofollow" env=!allow_social_scraper
 </IfModule>
 
-# Prevent access to sensitive files
+# Prevent access to sensitive files (but allow Facebook scraper)
 <FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak)$">
-    Order Allow,Deny
-    Deny from all
+    <RequireAll>
+        Require all denied
+        Require env allow_fb_scraper
+        Require env allow_social_scraper
+    </RequireAll>
 </FilesMatch>
 
-# Prevent access to config files
+# Prevent access to config files (but allow Facebook scraper)
 <Files "config.php">
-    Order Allow,Deny
-    Deny from all
+    <RequireAll>
+        Require all denied
+        Require env allow_fb_scraper
+        Require env allow_social_scraper
+    </RequireAll>
 </Files>
 
 # Enable compression
