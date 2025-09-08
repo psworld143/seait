@@ -89,8 +89,8 @@ if ($is_bot) {
     <!-- Open Graph Meta Tags for Social Media Sharing -->
     <?php
     // Enhanced Facebook sharing with better image handling
-    // IMPORTANT: Use HTTP for OG scraping while SSL is fixed (avoids cert errors for bots)
-    $public_scheme = 'http';
+    // Use HTTPS for secure Open Graph meta tags
+    $public_scheme = 'https';
     $public_origin = $public_scheme . '://' . $_SERVER['HTTP_HOST'];
     $og_image_url = '';
     $og_image_width = 1200;
@@ -113,7 +113,11 @@ if ($is_bot) {
     // Build current page URL - ensure it's the exact URL being shared
     $current_url = $public_origin . $_SERVER['REQUEST_URI'];
     
-    // Check if post has a featured image
+    // Check if post has a featured image - prioritize actual post images
+    $og_image_url = '';
+    $og_image_alt = "Featured image for: " . htmlspecialchars($post['title']);
+    
+    // First, try the main featured image
     if (!empty($post['image_url']) && trim($post['image_url']) !== '') {
         $image_path = trim($post['image_url']);
         
@@ -124,39 +128,57 @@ if ($is_bot) {
         } else {
             $og_image_url = $image_path;
         }
-        
-        // Try to get actual image dimensions for better quality
-        $local_path = str_replace($public_origin . "/", "", $og_image_url);
-        $local_path = str_replace("http://" . $_SERVER['HTTP_HOST'] . "/", "", $local_path);
-        
-        if (file_exists($local_path)) {
-            $image_info = @getimagesize($local_path);
-            if ($image_info !== false) {
-                $og_image_width = $image_info[0];
-                $og_image_height = $image_info[1];
-            }
+    }
+    
+    // If no featured image, try to get the first additional image
+    if (empty($og_image_url) && !empty($post['additional_image_url'])) {
+        $additional_images = [];
+        $decoded = json_decode($post['additional_image_url'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && !empty($decoded)) {
+            $additional_images = $decoded;
+        } else if (!empty($post['additional_image_url'])) {
+            $additional_images = [$post['additional_image_url']];
         }
         
-        $og_image_alt = "Featured image for: " . htmlspecialchars($post['title']);
-    } else {
-        // High-quality fallback to SEAIT logo
-        $og_image_url = $public_origin . "/assets/images/seait-logo.png";
-        $og_image_alt = "SEAIT - South East Asian Institute of Technology, Inc.";
-        
-        // Get logo dimensions if available
-        if (file_exists('assets/images/seait-logo.png')) {
-            $image_info = @getimagesize('assets/images/seait-logo.png');
-            if ($image_info !== false) {
-                $og_image_width = $image_info[0];
-                $og_image_height = $image_info[1];
+        if (!empty($additional_images[0])) {
+            $image_path = trim($additional_images[0]);
+            if (strpos($image_path, 'http') !== 0) {
+                $image_path = ltrim($image_path, '/');
+                $og_image_url = $public_origin . "/" . $image_path;
+            } else {
+                $og_image_url = $image_path;
             }
         }
     }
     
-    // Ensure minimum Facebook recommended dimensions
+    // If still no image, use SEAIT logo as last resort
+    if (empty($og_image_url)) {
+        $og_image_url = $public_origin . "/assets/images/seait-logo.png";
+        $og_image_alt = "SEAIT - South East Asian Institute of Technology, Inc.";
+    }
+    
+    // Try to get actual image dimensions for better quality
+    $local_path = str_replace($public_origin . "/", "", $og_image_url);
+    $local_path = str_replace("http://" . $_SERVER['HTTP_HOST'] . "/", "", $local_path);
+    $local_path = str_replace("https://" . $_SERVER['HTTP_HOST'] . "/", "", $local_path);
+    
+    if (file_exists($local_path)) {
+        $image_info = @getimagesize($local_path);
+        if ($image_info !== false) {
+            $og_image_width = $image_info[0];
+            $og_image_height = $image_info[1];
+        }
+    }
+    
+    // Ensure optimal Facebook recommended dimensions for clear, non-blurry images
+    // Facebook prefers 1200x630 for best quality, but we'll use actual dimensions if larger
     if ($og_image_width < 1200 || $og_image_height < 630) {
+        // If image is too small, use Facebook's recommended minimum
         $og_image_width = max($og_image_width, 1200);
         $og_image_height = max($og_image_height, 630);
+    } else {
+        // If image is larger, keep original dimensions for better quality
+        // Facebook will scale down but maintain quality
     }
     
     // Prepare author name
@@ -179,13 +201,17 @@ if ($is_bot) {
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="SEAIT - South East Asian Institute of Technology, Inc.">
     
-    <!-- Image Meta Tags -->
+    <!-- Image Meta Tags - Optimized for Facebook -->
     <meta property="og:image" content="<?php echo htmlspecialchars($og_image_url, ENT_QUOTES, 'UTF-8'); ?>">
     <meta property="og:image:secure_url" content="<?php echo htmlspecialchars($og_image_url, ENT_QUOTES, 'UTF-8'); ?>">
     <meta property="og:image:width" content="<?php echo $og_image_width; ?>">
     <meta property="og:image:height" content="<?php echo $og_image_height; ?>">
     <meta property="og:image:alt" content="<?php echo htmlspecialchars($og_image_alt, ENT_QUOTES, 'UTF-8'); ?>">
     <meta property="og:image:type" content="image/jpeg">
+    
+    <!-- Additional Facebook Image Meta Tags for Better Quality -->
+    <meta property="og:image:url" content="<?php echo htmlspecialchars($og_image_url, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta name="twitter:image:src" content="<?php echo htmlspecialchars($og_image_url, ENT_QUOTES, 'UTF-8'); ?>">
     
     <!-- Additional Meta Tags -->
     <meta property="og:locale" content="en_US">
@@ -216,8 +242,9 @@ if ($is_bot) {
     Post Title: <?php echo htmlspecialchars($post['title']); ?>
     Post Type: <?php echo $post['type']; ?>
     Author: <?php echo htmlspecialchars($author_name); ?>
-    Image URL: <?php echo htmlspecialchars($post['image_url'] ?? 'No featured image'); ?>
-    OG Image URL: <?php echo htmlspecialchars($og_image_url); ?>
+    Featured Image URL: <?php echo htmlspecialchars($post['image_url'] ?? 'No featured image'); ?>
+    Additional Images: <?php echo htmlspecialchars($post['additional_image_url'] ?? 'No additional images'); ?>
+    Final OG Image URL: <?php echo htmlspecialchars($og_image_url); ?>
     OG Image Dimensions: <?php echo $og_image_width; ?>x<?php echo $og_image_height; ?>
     Current URL: <?php echo htmlspecialchars($current_url); ?>
     Description Length: <?php echo strlen($og_description); ?> chars
@@ -662,36 +689,36 @@ if ($is_bot) {
                     </div>
                     <div class="flex space-x-3">
                         <a href="javascript:void(0);"
-                           onclick="shareToFacebook('<?php echo htmlspecialchars($post['title']); ?>', '<?php echo 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>')"
+                           onclick="shareToFacebook('<?php echo htmlspecialchars($post['title']); ?>', '<?php echo $public_origin . $_SERVER['REQUEST_URI']; ?>')"
                            class="text-gray-600 hover:text-seait-orange transition p-2 rounded-full hover:bg-gray-100"
                            title="Share on Facebook">
                             <i class="fab fa-facebook text-lg"></i>
                         </a>
                         <a href="javascript:void(0);"
-                           onclick="copyToClipboard('<?php echo 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>')"
+                           onclick="copyToClipboard('<?php echo $public_origin . $_SERVER['REQUEST_URI']; ?>')"
                            class="text-gray-600 hover:text-seait-orange transition p-2 rounded-full hover:bg-gray-100"
                            title="Copy URL">
                             <i class="fas fa-link text-lg"></i>
                         </a>
                         <a href="javascript:void(0);"
-                           onclick="showShareOptions('<?php echo htmlspecialchars($post['title']); ?>', '<?php echo 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>')"
+                           onclick="showShareOptions('<?php echo htmlspecialchars($post['title']); ?>', '<?php echo $public_origin . $_SERVER['REQUEST_URI']; ?>')"
                            class="text-gray-600 hover:text-seait-orange transition p-2 rounded-full hover:bg-gray-100"
                            title="More sharing options">
                             <i class="fas fa-share-alt text-lg"></i>
                         </a>
                         <a href="javascript:void(0);"
-                           onclick="debugFacebookShare('<?php echo 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>')"
+                           onclick="debugFacebookShare('<?php echo $public_origin . $_SERVER['REQUEST_URI']; ?>')"
                            class="text-gray-600 hover:text-seait-orange transition p-2 rounded-full hover:bg-gray-100"
                            title="Debug Facebook Share Preview">
                             <i class="fas fa-bug text-lg"></i>
                         </a>
-                        <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>&text=<?php echo urlencode(htmlspecialchars($post['title'])); ?>"
+                        <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode($public_origin . $_SERVER['REQUEST_URI']); ?>&text=<?php echo urlencode(htmlspecialchars($post['title'])); ?>"
                            target="_blank"
                            class="text-gray-600 hover:text-seait-orange transition p-2 rounded-full hover:bg-gray-100"
                            onclick="window.open(this.href, 'twitter-share', 'width=580,height=296'); return false;">
                             <i class="fab fa-twitter text-lg"></i>
                         </a>
-                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>"
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo urlencode($public_origin . $_SERVER['REQUEST_URI']); ?>"
                            target="_blank"
                            class="text-gray-600 hover:text-seait-orange transition p-2 rounded-full hover:bg-gray-100"
                            onclick="window.open(this.href, 'linkedin-share', 'width=580,height=296'); return false;">
@@ -718,7 +745,7 @@ if ($is_bot) {
                 <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold mb-2 text-seait-dark">
-                            <a href="news-detail.php?id=<?php echo encrypt_id($related['id']); ?>" class="hover:text-seait-orange transition">
+                            <a href="<?php echo $public_origin; ?>/news-detail.php?id=<?php echo encrypt_id($related['id']); ?>" class="hover:text-seait-orange transition">
                                 <?php echo htmlspecialchars($related['title']); ?>
                             </a>
                         </h3>
