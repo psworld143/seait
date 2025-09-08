@@ -1,16 +1,7 @@
-# CRITICAL: Allow Facebook and social media scrapers FIRST
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    
-    # Allow Facebook's scraper to access ALL pages - highest priority
-    RewriteCond %{HTTP_USER_AGENT} facebookexternalhit [NC]
-    RewriteRule ^(.*)$ - [L,E=ALLOW_FB:1]
-    
-    # Allow other social media scrapers
-    RewriteCond %{HTTP_USER_AGENT} (Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|DiscordBot) [NC]
-    RewriteRule ^(.*)$ - [L,E=ALLOW_SOCIAL:1]
-</IfModule>
+# MINIMAL .htaccess for Facebook scraper access
+# This removes ALL restrictions to allow Facebook's scraper to work
 
+# PHP settings
 <IfModule mod_php.c>
     php_value upload_max_filesize 128M
     php_value post_max_size 128M
@@ -19,58 +10,19 @@
     php_value max_input_time 180
 </IfModule>
 
-# Fallback for environments using PHP via CGI/FastCGI that ignore php_value
+# Fallback for environments using PHP via CGI/FastCGI
 <IfModule !mod_php.c>
     <IfModule mod_env.c>
         SetEnv PHP_VALUE "upload_max_filesize=128M\npost_max_size=128M\nmemory_limit=256M\nmax_execution_time=180\nmax_input_time=180"
     </IfModule>
 </IfModule>
+
 # Enable URL rewriting
 RewriteEngine On
 
-# Handle 404 errors - redirect to custom 404 page
+# Handle 404 errors
 ErrorDocument 404 /seait/404.php
-
-# Handle other common errors
-# IMPORTANT: Do not remap 403 to avoid blocking social scrapers
-#ErrorDocument 403 /seait/404.php
 ErrorDocument 500 /seait/404.php
-
-
-# Security headers
-<IfModule mod_headers.c>
-    # Allow Facebook scraper to access pages
-    SetEnvIf User-Agent "facebookexternalhit" allow_fb_scraper
-    SetEnvIf User-Agent "(Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|DiscordBot)" allow_social_scraper
-    
-    # Apply security headers only to non-scraper requests
-    Header always set X-Content-Type-Options nosniff env=!allow_fb_scraper
-    Header always set X-Frame-Options DENY env=!allow_fb_scraper
-    Header always set X-XSS-Protection "1; mode=block" env=!allow_fb_scraper
-    Header always set Referrer-Policy "strict-origin-when-cross-origin" env=!allow_fb_scraper
-    
-    # Set robots tag for non-scrapers
-    Header always set X-Robots-Tag "noindex, nofollow" env=!allow_fb_scraper
-    Header always set X-Robots-Tag "noindex, nofollow" env=!allow_social_scraper
-</IfModule>
-
-# Prevent access to sensitive files (but allow Facebook scraper)
-<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak)$">
-    <RequireAll>
-        Require all denied
-        Require env allow_fb_scraper
-        Require env allow_social_scraper
-    </RequireAll>
-</FilesMatch>
-
-# Prevent access to config files (but allow Facebook scraper)
-<Files "config.php">
-    <RequireAll>
-        Require all denied
-        Require env allow_fb_scraper
-        Require env allow_social_scraper
-    </RequireAll>
-</Files>
 
 # Enable compression
 <IfModule mod_deflate.c>
@@ -110,16 +62,12 @@ RewriteRule ^ %1 [R=301,L]
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Custom 404 handling for specific file types (skip for social scrapers)
-RewriteCond %{ENV:ALLOW_FB} !1
-RewriteCond %{ENV:ALLOW_SOCIAL} !1
+# Basic 404 handling
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule \.(php|html|htm)$ /seait/404.php [L]
 
-# Handle missing directories (skip for social scrapers)
-RewriteCond %{ENV:ALLOW_FB} !1
-RewriteCond %{ENV:ALLOW_SOCIAL} !1
+# Handle missing directories
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ /seait/404.php [L]
