@@ -4,7 +4,20 @@ require_once 'config/database.php';
 require_once 'includes/functions.php';
 require_once 'includes/id_encryption.php';
 
+// Check if this is a Facebook scraper or similar bot
+$is_bot = false;
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+if (preg_match('/facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram/i', $user_agent)) {
+    $is_bot = true;
+}
+
 if (!isset($_GET['id'])) {
+    if ($is_bot) {
+        // For bots, show a basic page instead of redirecting
+        http_response_code(404);
+        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title></head><body><h1>Page Not Found</h1></body></html>';
+        exit();
+    }
     header("Location: index.php");
     exit();
 }
@@ -12,6 +25,12 @@ if (!isset($_GET['id'])) {
 $post_id = safe_decrypt_id($_GET['id']);
 
 if (!$post_id) {
+    if ($is_bot) {
+        // For bots, show a basic page instead of redirecting
+        http_response_code(404);
+        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title></head><body><h1>Page Not Found</h1></body></html>';
+        exit();
+    }
     header("Location: index.php");
     exit();
 }
@@ -25,6 +44,12 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
 if (!$post = mysqli_fetch_assoc($result)) {
+    if ($is_bot) {
+        // For bots, show a basic page instead of redirecting
+        http_response_code(404);
+        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title></head><body><h1>Page Not Found</h1></body></html>';
+        exit();
+    }
     header("Location: index.php");
     exit();
 }
@@ -51,15 +76,31 @@ if (!$post = mysqli_fetch_assoc($result)) {
 
     <!-- Open Graph Meta Tags for Social Media Sharing -->
     <?php
-    // Enhanced Facebook sharing image logic
+    // Enhanced Facebook sharing with better image handling
     $og_image_url = '';
     $og_image_width = 1200;
     $og_image_height = 630;
     $og_image_alt = htmlspecialchars($post['title']);
     
+    // Clean and prepare description - more robust cleaning
+    $og_description = $post['content'];
+    $og_description = strip_tags($og_description);
+    $og_description = preg_replace('/\s+/', ' ', $og_description); // Remove extra whitespace
+    $og_description = trim($og_description);
+    $og_description = html_entity_decode($og_description, ENT_QUOTES, 'UTF-8'); // Decode HTML entities
+    
+    // Limit description length for better Facebook display
+    if (strlen($og_description) > 200) {
+        $og_description = substr($og_description, 0, 197) . '...';
+    }
+    $og_description = htmlspecialchars($og_description, ENT_QUOTES, 'UTF-8');
+    
+    // Build current page URL - ensure it's the exact URL being shared
+    $current_url = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    
     // Check if post has a featured image
-    if (!empty($post['image_url'])) {
-        $image_path = $post['image_url'];
+    if (!empty($post['image_url']) && trim($post['image_url']) !== '') {
+        $image_path = trim($post['image_url']);
         
         // Ensure absolute URL for Facebook
         if (strpos($image_path, 'http') !== 0) {
@@ -71,6 +112,8 @@ if (!$post = mysqli_fetch_assoc($result)) {
         
         // Try to get actual image dimensions for better quality
         $local_path = str_replace("https://" . $_SERVER['HTTP_HOST'] . "/", "", $og_image_url);
+        $local_path = str_replace("http://" . $_SERVER['HTTP_HOST'] . "/", "", $local_path);
+        
         if (file_exists($local_path)) {
             $image_info = @getimagesize($local_path);
             if ($image_info !== false) {
@@ -78,6 +121,8 @@ if (!$post = mysqli_fetch_assoc($result)) {
                 $og_image_height = $image_info[1];
             }
         }
+        
+        $og_image_alt = "Featured image for: " . htmlspecialchars($post['title']);
     } else {
         // High-quality fallback to SEAIT logo
         $og_image_url = "https://" . $_SERVER['HTTP_HOST'] . "/assets/images/seait-logo.png";
@@ -98,38 +143,69 @@ if (!$post = mysqli_fetch_assoc($result)) {
         $og_image_width = max($og_image_width, 1200);
         $og_image_height = max($og_image_height, 630);
     }
+    
+    // Prepare author name
+    $author_name = $post['author'] ?? ($post['first_name'] . ' ' . $post['last_name']);
+    $author_name = trim($author_name);
+    if (empty($author_name)) {
+        $author_name = 'SEAIT';
+    }
     ?>
-    <meta property="og:title" content="<?php echo htmlspecialchars($post['title']); ?>">
-    <meta property="og:description" content="<?php echo htmlspecialchars(substr(strip_tags($post['content']), 0, 200)) . '...'; ?>">
-    <meta property="og:url" content="https://<?php echo $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">
+    
+    <!-- Essential Open Graph Meta Tags -->
+    <meta property="og:title" content="<?php echo htmlspecialchars($post['title'], ENT_QUOTES, 'UTF-8'); ?>">
+    <meta property="og:description" content="<?php echo $og_description; ?>">
+    <meta property="og:url" content="<?php echo htmlspecialchars($current_url, ENT_QUOTES, 'UTF-8'); ?>">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="SEAIT - South East Asian Institute of Technology, Inc.">
-    <meta property="og:image" content="<?php echo htmlspecialchars($og_image_url); ?>">
-    <meta property="og:image:secure_url" content="<?php echo htmlspecialchars($og_image_url); ?>">
+    
+    <!-- Image Meta Tags -->
+    <meta property="og:image" content="<?php echo htmlspecialchars($og_image_url, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta property="og:image:secure_url" content="<?php echo htmlspecialchars($og_image_url, ENT_QUOTES, 'UTF-8'); ?>">
     <meta property="og:image:width" content="<?php echo $og_image_width; ?>">
     <meta property="og:image:height" content="<?php echo $og_image_height; ?>">
-    <meta property="og:image:alt" content="<?php echo htmlspecialchars($og_image_alt); ?>">
+    <meta property="og:image:alt" content="<?php echo htmlspecialchars($og_image_alt, ENT_QUOTES, 'UTF-8'); ?>">
     <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:locale" content="en_US">
-    <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID_HERE">
     
-    <!-- Cache busting for Facebook to refresh preview -->
+    <!-- Additional Meta Tags -->
+    <meta property="og:locale" content="en_US">
     <meta property="og:updated_time" content="<?php echo time(); ?>">
-
-    <!-- Facebook App ID (optional but recommended) -->
-    <!-- <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID"> -->
-
+    
+    <!-- Article Specific Meta Tags -->
+    <meta property="article:published_time" content="<?php echo date('c', strtotime($post['created_at'])); ?>">
+    <meta property="article:author" content="<?php echo htmlspecialchars($author_name, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta property="article:section" content="<?php echo ucfirst($post['type']); ?>">
+    <meta property="article:tag" content="SEAIT,<?php echo ucfirst($post['type']); ?>,Education,News">
+    
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<?php echo htmlspecialchars($post['title']); ?>">
-    <meta name="twitter:description" content="<?php echo htmlspecialchars(substr(strip_tags($post['content']), 0, 200)) . '...'; ?>">
-    <meta name="twitter:image" content="<?php echo htmlspecialchars($og_image_url); ?>">
-    <meta name="twitter:image:alt" content="<?php echo htmlspecialchars($og_image_alt); ?>">
+    <meta name="twitter:title" content="<?php echo htmlspecialchars($post['title'], ENT_QUOTES, 'UTF-8'); ?>">
+    <meta name="twitter:description" content="<?php echo $og_description; ?>">
+    <meta name="twitter:image" content="<?php echo htmlspecialchars($og_image_url, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta name="twitter:image:alt" content="<?php echo htmlspecialchars($og_image_alt, ENT_QUOTES, 'UTF-8'); ?>">
+    
+    <!-- Standard Meta Tags -->
+    <meta name="description" content="<?php echo $og_description; ?>">
+    <meta name="author" content="<?php echo htmlspecialchars($author_name, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Debug Information (Hidden Comments) -->
+    <!-- 
+    DEBUG INFO FOR FACEBOOK SHARING:
+    Post ID: <?php echo $post_id; ?>
+    Post Title: <?php echo htmlspecialchars($post['title']); ?>
+    Post Type: <?php echo $post['type']; ?>
+    Author: <?php echo htmlspecialchars($author_name); ?>
+    Image URL: <?php echo htmlspecialchars($post['image_url'] ?? 'No featured image'); ?>
+    OG Image URL: <?php echo htmlspecialchars($og_image_url); ?>
+    OG Image Dimensions: <?php echo $og_image_width; ?>x<?php echo $og_image_height; ?>
+    Current URL: <?php echo htmlspecialchars($current_url); ?>
+    Description Length: <?php echo strlen($og_description); ?> chars
+    User Agent: <?php echo htmlspecialchars($user_agent); ?>
+    Is Bot: <?php echo $is_bot ? 'Yes' : 'No'; ?>
+    Facebook Debugger: https://developers.facebook.com/tools/debug/?q=<?php echo urlencode($current_url); ?>
+    -->
 
-    <!-- Article Meta Tags -->
-    <meta property="article:published_time" content="<?php echo $post['created_at']; ?>">
-    <meta property="article:author" content="<?php echo htmlspecialchars($post['author'] ?? $post['first_name'] . ' ' . $post['last_name']); ?>">
-    <meta property="article:section" content="<?php echo ucfirst($post['type']); ?>">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -824,10 +900,19 @@ if (!$post = mysqli_fetch_assoc($result)) {
                             <div class="bg-red-50 p-4 rounded-lg">
                                 <h4 class="font-semibold text-red-800 mb-2">🔧 Facebook Debugger Tool</h4>
                                 <p class="text-sm text-red-700 mb-3">Use Facebook's official tool to see exactly how your page appears and refresh the cache:</p>
-                                <button onclick="window.open('${debugUrl}', '_blank')" 
-                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">
-                                    🔍 Open Facebook Debugger
-                                </button>
+                                <div class="space-y-2">
+                                    <button onclick="window.open('${debugUrl}', '_blank')" 
+                                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">
+                                        🔍 Open Facebook Debugger
+                                    </button>
+                                    <button onclick="window.open('/test-facebook-preview.php', '_blank')" 
+                                            class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">
+                                        🧪 Open Test Page
+                                    </button>
+                                </div>
+                                <p class="text-xs text-red-600 mt-2">
+                                    <strong>Important:</strong> After opening the debugger, click "Scrape Again" to refresh Facebook's cache!
+                                </p>
                             </div>
                         </div>
 
