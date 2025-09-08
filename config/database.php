@@ -1,6 +1,6 @@
 <?php
 // Database configuration
-$host = 'localhost';
+$host = 'seait-edu.ph';
 $dbname = 'seaitedu_seait_website';
 $username = 'seaitedu_seait_website';
 $password = '020894Website';

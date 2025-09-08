@@ -22,12 +22,29 @@ ErrorDocument 404 /seait/404.php
 ErrorDocument 403 /seait/404.php
 ErrorDocument 500 /seait/404.php
 
+# Allow Facebook and social media scrapers
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Allow Facebook's scraper to access all pages
+    RewriteCond %{HTTP_USER_AGENT} facebookexternalhit [NC]
+    RewriteRule ^(.*)$ - [L]
+    
+    # Allow other social media scrapers
+    RewriteCond %{HTTP_USER_AGENT} (Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|DiscordBot) [NC]
+    RewriteRule ^(.*)$ - [L]
+</IfModule>
+
 # Security headers
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options nosniff
     Header always set X-Frame-Options DENY
     Header always set X-XSS-Protection "1; mode=block"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Allow Facebook scraper to access pages
+    SetEnvIf User-Agent "facebookexternalhit" allow_fb_scraper
+    Header always set X-Robots-Tag "noindex, nofollow" env=!allow_fb_scraper
 </IfModule>
 
 # Prevent access to sensitive files

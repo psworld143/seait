@@ -1,0 +1,45 @@
+User-agent: *
+Allow: /
+
+# Allow Facebook's scraper to access all pages for social media sharing
+User-agent: facebookexternalhit
+Allow: /
+
+# Allow other social media scrapers
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# Allow search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Disallow access to sensitive directories
+Disallow: /admin/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /vendor/
+Disallow: /database/
+Disallow: /uploads/
+Disallow: /assets/images/carousel/
+Disallow: /assets/images/colleges/
+Disallow: /assets/images/news/
+
+# Allow access to news detail pages for social sharing
+Allow: /news-detail.php
+Allow: /news.php
+Allow: /index.php
+
+# Sitemap location (if you have one)
+# Sitemap: https://home.seait-edu.ph/sitemap.xml

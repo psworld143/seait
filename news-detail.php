@@ -14,6 +14,8 @@ require_once 'includes/id_encryption.php';
 // Log bot access for debugging
 if ($is_bot) {
     error_log("Bot access detected: " . $user_agent . " - URL: " . $_SERVER['REQUEST_URI']);
+    // Set proper headers for bots
+    header('X-Robots-Tag: noindex, nofollow');
 }
 
 if (!isset($_GET['id'])) {
