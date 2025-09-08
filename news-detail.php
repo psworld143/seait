@@ -89,6 +89,9 @@ if ($is_bot) {
     <!-- Open Graph Meta Tags for Social Media Sharing -->
     <?php
     // Enhanced Facebook sharing with better image handling
+    // IMPORTANT: Use HTTP for OG scraping while SSL is fixed (avoids cert errors for bots)
+    $public_scheme = 'http';
+    $public_origin = $public_scheme . '://' . $_SERVER['HTTP_HOST'];
     $og_image_url = '';
     $og_image_width = 1200;
     $og_image_height = 630;
@@ -108,7 +111,7 @@ if ($is_bot) {
     $og_description = htmlspecialchars($og_description, ENT_QUOTES, 'UTF-8');
     
     // Build current page URL - ensure it's the exact URL being shared
-    $current_url = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $current_url = $public_origin . $_SERVER['REQUEST_URI'];
     
     // Check if post has a featured image
     if (!empty($post['image_url']) && trim($post['image_url']) !== '') {
@@ -117,13 +120,13 @@ if ($is_bot) {
         // Ensure absolute URL for Facebook
         if (strpos($image_path, 'http') !== 0) {
             $image_path = ltrim($image_path, '/');
-            $og_image_url = "https://" . $_SERVER['HTTP_HOST'] . "/" . $image_path;
+            $og_image_url = $public_origin . "/" . $image_path;
         } else {
             $og_image_url = $image_path;
         }
         
         // Try to get actual image dimensions for better quality
-        $local_path = str_replace("https://" . $_SERVER['HTTP_HOST'] . "/", "", $og_image_url);
+        $local_path = str_replace($public_origin . "/", "", $og_image_url);
         $local_path = str_replace("http://" . $_SERVER['HTTP_HOST'] . "/", "", $local_path);
         
         if (file_exists($local_path)) {
@@ -137,7 +140,7 @@ if ($is_bot) {
         $og_image_alt = "Featured image for: " . htmlspecialchars($post['title']);
     } else {
         // High-quality fallback to SEAIT logo
-        $og_image_url = "https://" . $_SERVER['HTTP_HOST'] . "/assets/images/seait-logo.png";
+        $og_image_url = $public_origin . "/assets/images/seait-logo.png";
         $og_image_alt = "SEAIT - South East Asian Institute of Technology, Inc.";
         
         // Get logo dimensions if available

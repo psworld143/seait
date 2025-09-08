@@ -32,7 +32,8 @@ RewriteEngine On
 ErrorDocument 404 /seait/404.php
 
 # Handle other common errors
-ErrorDocument 403 /seait/404.php
+# IMPORTANT: Do not remap 403 to avoid blocking social scrapers
+#ErrorDocument 403 /seait/404.php
 ErrorDocument 500 /seait/404.php
 
 
@@ -109,12 +110,16 @@ RewriteRule ^ %1 [R=301,L]
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Custom 404 handling for specific file types
+# Custom 404 handling for specific file types (skip for social scrapers)
+RewriteCond %{ENV:ALLOW_FB} !1
+RewriteCond %{ENV:ALLOW_SOCIAL} !1
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule \.(php|html|htm)$ /seait/404.php [L]
 
-# Handle missing directories
+# Handle missing directories (skip for social scrapers)
+RewriteCond %{ENV:ALLOW_FB} !1
+RewriteCond %{ENV:ALLOW_SOCIAL} !1
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ /seait/404.php [L]
