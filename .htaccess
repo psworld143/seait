@@ -1,20 +1,11 @@
-# MINIMAL .htaccess for Facebook scraper access
-# This removes ALL restrictions to allow Facebook's scraper to work
-
-# PHP settings
+# Minimal .htaccess - NO restrictions for Facebook scraper
+# PHP settings only
 <IfModule mod_php.c>
     php_value upload_max_filesize 128M
     php_value post_max_size 128M
     php_value memory_limit 256M
     php_value max_execution_time 180
     php_value max_input_time 180
-</IfModule>
-
-# Fallback for environments using PHP via CGI/FastCGI
-<IfModule !mod_php.c>
-    <IfModule mod_env.c>
-        SetEnv PHP_VALUE "upload_max_filesize=128M\npost_max_size=128M\nmemory_limit=256M\nmax_execution_time=180\nmax_input_time=180"
-    </IfModule>
 </IfModule>
 
 # Enable URL rewriting
@@ -28,13 +19,8 @@ ErrorDocument 500 /seait/404.php
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/plain
     AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/xml
     AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/rss+xml
     AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
 
 # Set browser caching
@@ -45,12 +31,6 @@ ErrorDocument 500 /seait/404.php
     ExpiresByType image/png "access plus 1 year"
     ExpiresByType image/jpg "access plus 1 year"
     ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/ico "access plus 1 year"
-    ExpiresByType image/icon "access plus 1 year"
-    ExpiresByType text/plain "access plus 1 month"
-    ExpiresByType application/pdf "access plus 1 month"
-    ExpiresByType application/x-shockwave-flash "access plus 1 month"
 </IfModule>
 
 # Remove trailing slashes
@@ -58,16 +38,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} (.+)/$
 RewriteRule ^ %1 [R=301,L]
 
-# Force HTTPS (uncomment if you have SSL)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
 # Basic 404 handling
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule \.(php|html|htm)$ /seait/404.php [L]
-
-# Handle missing directories
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ /seait/404.php [L]

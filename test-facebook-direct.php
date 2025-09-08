@@ -1,3 +1,4 @@
+
 <?php
 // Direct test for Facebook scraper access
 header('Content-Type: text/html; charset=utf-8');
