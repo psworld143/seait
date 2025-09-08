@@ -1,21 +1,26 @@
 <?php
-session_start();
+// Start session only for non-bot requests
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+$is_bot = preg_match('/facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram|slackbot|discordbot/i', $user_agent);
+
+if (!$is_bot) {
+    session_start();
+}
+
 require_once 'config/database.php';
 require_once 'includes/functions.php';
 require_once 'includes/id_encryption.php';
 
-// Check if this is a Facebook scraper or similar bot
-$is_bot = false;
-$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-if (preg_match('/facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram/i', $user_agent)) {
-    $is_bot = true;
+// Log bot access for debugging
+if ($is_bot) {
+    error_log("Bot access detected: " . $user_agent . " - URL: " . $_SERVER['REQUEST_URI']);
 }
 
 if (!isset($_GET['id'])) {
     if ($is_bot) {
         // For bots, show a basic page instead of redirecting
         http_response_code(404);
-        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title></head><body><h1>Page Not Found</h1></body></html>';
+        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title><meta property="og:title" content="Page Not Found - SEAIT"></head><body><h1>Page Not Found</h1></body></html>';
         exit();
     }
     header("Location: index.php");
@@ -28,7 +33,7 @@ if (!$post_id) {
     if ($is_bot) {
         // For bots, show a basic page instead of redirecting
         http_response_code(404);
-        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title></head><body><h1>Page Not Found</h1></body></html>';
+        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title><meta property="og:title" content="Page Not Found - SEAIT"></head><body><h1>Page Not Found</h1></body></html>';
         exit();
     }
     header("Location: index.php");
@@ -47,11 +52,16 @@ if (!$post = mysqli_fetch_assoc($result)) {
     if ($is_bot) {
         // For bots, show a basic page instead of redirecting
         http_response_code(404);
-        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title></head><body><h1>Page Not Found</h1></body></html>';
+        echo '<!DOCTYPE html><html><head><title>Page Not Found - SEAIT</title><meta property="og:title" content="Page Not Found - SEAIT"></head><body><h1>Page Not Found</h1></body></html>';
         exit();
     }
     header("Location: index.php");
     exit();
+}
+
+// Log successful post retrieval for bots
+if ($is_bot) {
+    error_log("Bot successfully retrieved post ID: " . $post_id . " - Title: " . $post['title']);
 }
 ?>
 
@@ -149,6 +159,11 @@ if (!$post = mysqli_fetch_assoc($result)) {
     $author_name = trim($author_name);
     if (empty($author_name)) {
         $author_name = 'SEAIT';
+    }
+    
+    // Log meta tag generation for debugging
+    if ($is_bot) {
+        error_log("Generating OG meta tags - Title: " . $post['title'] . " - Image: " . $og_image_url . " - Description length: " . strlen($og_description));
     }
     ?>
     
