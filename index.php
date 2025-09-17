@@ -230,7 +230,14 @@ $courses_result = mysqli_query($conn, $courses_query);
         }
 
         .carousel-title, .carousel-subtitle, .carousel-description {
-            text-shadow: 0 2px 8px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.25);
+            text-shadow: 0 4px 12px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        /* Enhanced text content background for better readability */
+        .carousel-content-bg {
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.4) 100%);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
         }
 
         /* Page Loader Styles */
@@ -250,6 +257,16 @@ $courses_result = mysqli_query($conn, $courses_query);
         .carousel-hidden {
             opacity: 0;
             pointer-events: none;
+        }
+        
+        /* Carousel Content Toggle Styles */
+        .carousel-content-minimized {
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+        }
+        .carousel-toggle-button {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -284,8 +301,9 @@ $courses_result = mysqli_query($conn, $courses_query);
                     $slide_count++;
                 ?>
                 <div class="carousel-slide absolute inset-0 transition-all duration-1000 ease-in-out <?php echo $slide_count === 1 ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-105 pointer-events-none'; ?>" data-slide="<?php echo $slide_count; ?>">
-                    <!-- Background Image with Overlay -->
-                    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+                    <!-- Background Image with Enhanced Overlay -->
+                    <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30"></div>
                     <img src="<?php echo htmlspecialchars($slide['image_url']); ?>"
                          alt="<?php echo htmlspecialchars($slide['title']); ?>"
                          class="absolute inset-0 w-full h-full object-cover"
@@ -297,7 +315,7 @@ $courses_result = mysqli_query($conn, $courses_query);
                         <!-- Mobile: Center content, Desktop/Tablet: Lower left with reduced top margin -->
                         <div class="w-full flex items-center justify-center md:items-end md:justify-start md:pb-20 md:pt-8 md:pl-8 lg:pb-24 lg:pt-12 lg:pl-12">
                             <div class="max-w-7xl mx-auto md:mx-0 px-4 text-center md:text-left">
-                                <div class="max-w-4xl md:max-w-2xl lg:max-w-3xl rounded-xl shadow-lg p-6 md:p-8">
+                                <div class="max-w-4xl md:max-w-2xl lg:max-w-3xl rounded-xl shadow-2xl p-6 md:p-8 carousel-content-bg border border-white/10">
                                     <!-- Title -->
                                     <h1 class="carousel-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 md:mb-3 px-2 md:px-0 <?php echo $slide_count === 1 ? 'animate-fade-in' : 'opacity-0 transform translate-y-8'; ?>">
                                         <?php echo nl2br(htmlspecialchars($slide['title'])); ?>
@@ -436,7 +454,7 @@ $courses_result = mysqli_query($conn, $courses_query);
                     for ($i = 0; $i < min($total_core_values, $first_row_limit); $i++) {
                         $core_value = $core_values[$i];
                         ?>
-                        <div class="text-center p-6 bg-seait-light rounded-lg hover:shadow-lg transition duration-300 w-full max-w-sm">
+                        <div class="text-center p-6 bg-seait-light rounded-lg hover:shadow-lg transition duration-300 w-full max-w-sm md:max-w-xs lg:max-w-sm">
                             <div class="w-16 h-16 bg-seait-orange rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="<?php echo htmlspecialchars($core_value['icon']); ?> text-white text-2xl"></i>
                             </div>
@@ -637,7 +655,7 @@ $courses_result = mysqli_query($conn, $courses_query);
             <div id="<?php echo $level['id']; ?>-admission" class="admission-content <?php echo $first_content ? '' : 'hidden'; ?>">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
                     <div>
-                        <h3 class="text-2xl md:text-3xl font-bold text-seait-dark dark:text-white mb-4"><?php echo htmlspecialchars($level['name']); ?></h3>
+                        <h3 class="text-2xl font-bold text-seait-dark dark:text-white mb-4"><?php echo htmlspecialchars($level['name']); ?></h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-6"><?php echo htmlspecialchars($level['description']); ?></p>
 
                         <?php
@@ -887,9 +905,9 @@ $courses_result = mysqli_query($conn, $courses_query);
 
                     while($publication = mysqli_fetch_assoc($publications_result)):
                     ?>
-                    <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition duration-300">
+                    <div class="bg-white border border-gray-200 dark:border-gray-300 rounded-lg p-4 hover:shadow-lg transition duration-300">
                         <div class="mb-3">
-                            <h4 class="text-base font-semibold text-seait-dark mb-2 line-clamp-2"><?php echo htmlspecialchars($publication['title']); ?></h4>
+                            <h4 class="text-base font-semibold text-seait-dark dark:text-black mb-2 line-clamp-2"><?php echo htmlspecialchars($publication['title']); ?></h4>
                             <div class="flex items-center space-x-2 mb-2">
                                 <span class="px-2 py-1 rounded-full text-xs font-medium" style="background-color: <?php echo $publication['color_theme']; ?>20; color: <?php echo $publication['color_theme']; ?>">
                                     <?php echo htmlspecialchars($publication['category_name']); ?>
@@ -1700,6 +1718,49 @@ $courses_result = mysqli_query($conn, $courses_query);
                     }
                 }, 1000);
             }
+        });
+
+        // Carousel Content Toggle Functionality
+        let contentStates = {}; // Track state for each slide
+
+        function toggleCarouselContent(slideNumber) {
+            const carouselContent = document.querySelector(`.carousel-content-container[data-slide="${slideNumber}"]`);
+            const toggleButton = document.querySelector(`.carousel-toggle-btn[data-slide="${slideNumber}"]`);
+            const toggleIcon = toggleButton ? toggleButton.querySelector('.toggle-icon') : null;
+            
+            if (!carouselContent || !toggleIcon || !toggleButton) return;
+
+            // Initialize state if not exists
+            if (contentStates[slideNumber] === undefined) {
+                contentStates[slideNumber] = false; // false = visible, true = minimized
+            }
+
+            contentStates[slideNumber] = !contentStates[slideNumber];
+
+            if (contentStates[slideNumber]) {
+                // Minimize content
+                carouselContent.classList.add('carousel-content-minimized');
+                toggleIcon.className = 'toggle-icon fas fa-plus text-lg';
+                toggleButton.title = 'Show content';
+            } else {
+                // Restore content
+                carouselContent.classList.remove('carousel-content-minimized');
+                toggleIcon.className = 'toggle-icon fas fa-minus text-lg';
+                toggleButton.title = 'Hide content';
+            }
+        }
+
+        // Initialize toggle buttons
+        window.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.carousel-toggle-btn');
+            toggleButtons.forEach(button => {
+                button.classList.add('carousel-toggle-button');
+                // Initialize content states
+                const slideNumber = button.getAttribute('data-slide');
+                if (slideNumber) {
+                    contentStates[slideNumber] = false; // All start visible
+                }
+            });
         });
     </script>
 </body>

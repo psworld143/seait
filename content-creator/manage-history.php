@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $query = "UPDATE mission_vision SET type = ?, title = ?, content = ?, is_active = ? WHERE id = ?";
             $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, 'sssiis', $type, $title, $content, $is_active, $id);
+            mysqli_stmt_bind_param($stmt, 'sssii', $type, $title, $content, $is_active, $id);
 
             if (mysqli_stmt_execute($stmt)) {
                 $message = 'Mission/Vision updated successfully!';
