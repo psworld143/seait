@@ -380,11 +380,189 @@ $courses_result = mysqli_query($conn, $courses_query);
                 <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">Committed to academic excellence and innovation in technology education</p>
             </div>
 
+            <!-- SEAIT Overview -->
+            <div class="mb-12">
+                <div class="bg-white border border-orange-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="bg-gradient-to-r from-seait-orange/10 via-orange-50 to-white p-6 md:p-10">
+                        <!-- SEAIT Title with Icon -->
+                        <div class="text-center mb-3">
+                            <div class="inline-flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-full bg-seait-orange text-white flex items-center justify-center shadow"><i class="fas fa-school"></i></span>
+                                <h3 class="text-2xl md:text-3xl font-extrabold text-seait-dark tracking-tight">SOUTH EAST ASIAN INSTITUTE OF TECHNOLOGY</h3>
+                            </div>
+                        </div>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">In today’s higher education landscape, a life-changing opportunity to build a better future and a fulfilling career often begins with a pivotal decision: choosing the right tertiary institution. For many, balancing academic aspirations with financial limitations is a challenge. Within this reality, the South East Asian Institute of Technology Inc. (SEAIT) stands as a beacon of hope for aspiring students—offering both affordable and quality education.</p>
+                       
+                        <div class="space-y-3">
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tuition-Free Highlight Banner (Orange Gradient) -->
+            <div class="mb-10">
+                <div class="relative overflow-hidden rounded-2xl border border-orange-200 shadow-sm">
+                    <div class="absolute inset-0 bg-gradient-to-r from-seait-orange/10 via-orange-50 to-white opacity-90"></div>
+                    <div class="relative z-10 p-6 md:p-10 text-seait-dark">
+                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                            <div class="max-w-3xl space-y-3">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 border border-white/30 shadow">
+                                        <i class="fas fa-hand-holding-usd text-seait-orange"></i>
+                                    </span>
+                                    <h3 class="text-2xl md:text-3xl font-extrabold tracking-tight">A Tuition-Free Institution</h3>
+                                </div>
+                                <p class="opacity-95">SEAIT is a private higher education institution based in Tupi, South Cotabato, renowned for its commitment to providing tuition-free education for all college degree programs. Established in February 2006 by Hon. Reynaldo S. Tamayo Jr. and Mrs. Rochelle P. Tamayo, the institution was founded on the belief that education should be accessible to all, regardless of financial background.</p>
+                                <p class="opacity-95">However, SEAIT’s commitment extends beyond affordability. The institution is equally focused on delivering high-quality instruction and is dedicated to producing globally competent, values-driven graduates prepared to face the demands of an ever-evolving world.</p>
+                                <p class="opacity-95">Over the years, SEAIT has achieved significant milestones and continues to grow in both scope and recognition. From its early beginnings as a vocational school, the institution has developed into a full-fledged academic hub offering a wide range of programs and producing graduates who excel in their respective fields.</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 md:gap-4">
+                                <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20 text-center">
+                                    <div class="text-lg md:text-xl font-bold leading-none">2006</div>
+                                    <div class="text-xs opacity-90">Founded</div>
+                                </div>
+                                <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20 text-center">
+                                    <div class="text-lg md:text-xl font-bold leading-none">100%</div>
+                                    <div class="text-xs opacity-90">Tuition Fee</div>
+                                </div>
+                                <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20 text-center">
+                                    <div class="text-lg md:text-xl font-bold leading-none"><i class="fas fa-flask"></i></div>
+                                    <div class="text-xs opacity-90">Modern Labs</div>
+                                </div>
+                                <div class="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20 text-center">
+                                    <div class="text-lg md:text-xl font-bold leading-none"><i class="fas fa-people-carry"></i></div>
+                                    <div class="text-xs opacity-90">Student Support</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Facilities (Concise, Designed) -->
+            <div class="mb-16">
+                <div class="text-center mb-8">
+                    <h4 class="text-2xl md:text-3xl font-bold text-seait-dark mb-2">A PIONEER OF STUDENT SUPPORT AND SERVICES</h4>
+                    <p class="text-gray-600 max-w-4xl mx-auto px-4">SEAIT continuously invests in modern facilities to provide a holistic educational environment.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-vial"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Science Laboratories</h5>
+                                <p class="text-gray-600">Modern, well-equipped spaces designed to foster curiosity and discovery, complete with instruments, safety equipment, and materials for experiments and demonstrations.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-desktop"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Computer Laboratories</h5>
+                                <p class="text-gray-600">Equipped with state-of-the-art desktops, updated software, and fast internet connectivity that support programs such as Information Technology, Engineering, Business, and Education—ensuring learners gain vital digital and technical skills.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-book-reader"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Learning Center / Library</h5>
+                                <p class="text-gray-600">A dynamic learning hub with textbooks, references, journals, e-books, and multimedia resources, plus quiet study areas, group spaces, and access to online databases.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-hand-holding-heart"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Guidance Office</h5>
+                                <p class="text-gray-600">A safe and supportive space for personal, academic, and career counseling—offering professional advice, workshops, and interventions to help students thrive.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-basketball-ball"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Sports Facilities</h5>
+                                <p class="text-gray-600">Courts, fields, and gym equipment managed by the Sports Office to support competitive and recreational activities that build fitness, discipline, and teamwork.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Campus Canteen -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-utensils"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Campus Canteen</h5>
+                                <p class="text-gray-600">Affordable, nutritious, and freshly prepared meals—providing a welcoming communal space for students, faculty, and staff.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- School Dormitory -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-bed"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">School Dormitory</h5>
+                                <p class="text-gray-600">Safe, comfortable, and affordable housing that makes education accessible to students from remote areas.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Audio-Visual Room -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-photo-video"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Audio-Visual Room</h5>
+                                <p class="text-gray-600">A multimedia-equipped venue for seminars, lectures, presentations, and small conferences—as well as student activities and faculty training.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Kitchen & THM Simulation Room -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-concierge-bell"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Kitchen & THM Simulation Room</h5>
+                                <p class="text-gray-600">A specialized facility for Tourism and Hospitality Management with modern culinary tools and simulated real-world hospitality environments for hands-on training.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Speech Laboratory -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-microphone"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Speech Laboratory</h5>
+                                <p class="text-gray-600">A modern facility with headsets, audio-visual devices, soundproof cubicles, and interactive software for practicing speaking, listening, and pronunciation.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Agricultural Extensions -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition md:col-span-2">
+                        <div class="flex items-start gap-4">
+                            <div class="contact-icon-large bg-gradient-to-br from-seait-orange to-orange-500 text-white shadow-md"><i class="fas fa-tractor"></i></div>
+                            <div>
+                                <h5 class="text-lg font-semibold text-seait-dark mb-1">Agricultural Extensions</h5>
+                                <p class="text-gray-600">Farm areas, demonstration plots, and greenhouses located at Tucalabong and MAPECON serve as outdoor laboratories where students apply theories in plant science, crop production, livestock management, and sustainable farming practices.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center text-gray-600 mt-6">Moreover, SEAIT actively promotes student organizations that encourage leadership, social responsibility, and personal development.</p>
+            </div>
+
             <!-- History Section -->
             <div class="mb-16">
                 <div class="text-center mb-12">
-                    <h3 class="text-2xl md:text-3xl font-bold text-seait-dark mb-4">Our History</h3>
-                    <p class="text-gray-600 max-w-4xl mx-auto">A journey of excellence and innovation in education</p>
+                    <h3 class="text-2xl md:text-3xl font-bold text-seait-dark mb-4">BRIEF HISTORY</h3>
+                    <p class="text-gray-600 max-w-4xl mx-auto">The belief that education is one of the means of achieving a better future for oneself and one’s family was the main reason why school was conceived. Added to this is the fact that the founders, Reynaldo S. Tamayo Jr., and Rochelle P. Tamayo, have been looking at ways to give back to the community what they have received from the government as Department of Science and Technology (DOST) scholars. The South East Asian Institute of Technology, Inc. is a product of Tamayo’s desire to make a tangible contribution to the community and provide access to students </p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch history-grid">

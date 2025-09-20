@@ -22,9 +22,11 @@
             <div>
                 <h4 class="font-semibold mb-4 text-sm md:text-base">Contact Info</h4>
                 <ul class="space-y-2 text-gray-300 text-sm md:text-base">
-                    <li><i class="fas fa-map-marker-alt mr-2"></i> 123 SEAIT Street, City</li>
-                    <li><i class="fas fa-phone mr-2"></i> +63 123 456 7890</li>
-                    <li><i class="fas fa-envelope mr-2"></i> info@seait.edu.ph</li>
+                    <li><i class="fas fa-map-marker-alt mr-2"></i> 9505 Tupi, South Cotabato, Philippines</li>
+                    <li><i class="fas fa-phone mr-2"></i> (083) 226 1602 <span class="uppercase tracking-wide text-xs bg-gray-700 px-2 py-0.5 rounded ml-1">Registrar</span></li>
+                    <li><i class="fas fa-envelope mr-2"></i> seaitinc@yahoo.com <span class="uppercase tracking-wide text-xs bg-gray-700 px-2 py-0.5 rounded ml-1">Registrar</span></li>
+                    <li><i class="fas fa-envelope mr-2"></i> seaitmis@seait-edu.ph <span class="uppercase tracking-wide text-xs bg-gray-700 px-2 py-0.5 rounded ml-1">MIS</span></li>
+                    <li><i class="fas fa-clock mr-2"></i> Monday - Friday, 08:00AM - 05:00 PM</li>
                 </ul>
             </div>
             <div>
@@ -39,7 +41,7 @@
         </div>
 
         <div class="border-t border-gray-700 mt-6 md:mt-8 pt-6 md:pt-8 text-center text-gray-300">
-            <p class="text-sm md:text-base">&copy; 2024 South East Asian Institute of Technology, Inc. All rights reserved.</p>
+            <p class="text-sm md:text-base">&copy; 2025 South East Asian Institute of Technology, Inc. All rights reserved.</p>
             <p class="mt-2 text-sm md:text-base">
                 <a href="privacy.php" class="hover:text-white transition">Privacy Policy</a> |
                 <a href="terms.php" class="hover:text-white transition">Terms of Service</a>
